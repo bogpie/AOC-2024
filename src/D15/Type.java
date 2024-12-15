@@ -8,7 +8,9 @@ public enum Type {
     NORTH('^'),
     EAST('>'),
     SOUTH('v'),
-    WEST('<');
+    WEST('<'),
+    BIG_BOX_LEFT('['),
+    BIG_BOX_RIGHT(']');
 
     private final char value;
 
