@@ -125,7 +125,6 @@ public class D17 {
                     pointer += 2;
                 }
             }
-
             System.out.println("Registers: " + registers);
             System.out.println("Pointer: " + pointer);
 
