@@ -12,6 +12,7 @@ import java.util.Scanner;
 import static D16.RaceablePointType.*;
 
 public class D20 {
+    private static final int MAX_CHEAT_RULE = 20;
     static int MIN_SAVE_LOOKUP = 100;
 
     public void main() {
@@ -39,6 +40,70 @@ public class D20 {
         System.out.println("Steps to reach end: " + steps[end.x][end.y]);
 
         // For each point in the path, attempt to cheat by going through a wall
+        long noStepsSavedInLookup = doPartOne(area, steps, path);
+
+        System.out.println("There are " + noStepsSavedInLookup + " cheats that save at least " + MIN_SAVE_LOOKUP + " " +
+                "picoseconds");
+        System.out.println("Final answer for part one: " + noStepsSavedInLookup);
+
+        System.out.println();
+        System.out.println("Part two: ");
+        noStepsSavedInLookup = doPartTwo(area, steps, path);
+
+        System.out.println("There are " + noStepsSavedInLookup + " cheats that save at least " + MIN_SAVE_LOOKUP + " " +
+                "picoseconds");
+        System.out.println("Final answer for part two: " + noStepsSavedInLookup);
+    }
+
+    private long doPartTwo(char[][] area, int[][] steps, ArrayList<Point> path) {
+        // Part two: For each point in the path, attempt to cheat by going through at most MAX_CHEAT_RULE points
+        var cheatsPerNoSteps = new int[10000];
+        var noStepsSavedInLookup = 0;
+        for (Point point : path) {
+            boolean[][] hasVisitedDuringCheat = new boolean[area.length][area[0].length];
+
+            // Get the point in the path
+            StepQueue queue = new StepQueue();
+            queue.add(new PointStep(point, 0));
+            hasVisitedDuringCheat[point.x][point.y] = true;
+
+            // Flood the area again, but this time ignore walls, and only go through at most MAX_CHEAT_RULE points
+            while (!queue.isEmpty()) {
+                PointStep current = queue.poll();
+                Point currentPoint = current.getPoint();
+                int currentNoSteps = current.getNoSteps();
+
+                // Treat noSteps as the number of points we have gone through after we activated the cheat
+                if (current.getNoSteps() >= MAX_CHEAT_RULE) {
+                    continue;
+                }
+
+                for (Direction direction : Direction.values()) {
+                    Point nextPoint = new Point(
+                            currentPoint.x + direction.getValue().x,
+                            currentPoint.y + direction.getValue().y
+                    );
+
+                    if (getIsOutOfBounds(area, nextPoint)) continue;
+                    if (hasVisitedDuringCheat[nextPoint.x][nextPoint.y]) continue;
+
+                    if (!getIsWallPoint(area, nextPoint)) {
+                        int noStepsSaved = steps[nextPoint.x][nextPoint.y] - steps[point.x][point.y] - currentNoSteps - 1;
+                        if (noStepsSaved > 0) {
+                            cheatsPerNoSteps[noStepsSaved]++;
+                        }
+                    }
+
+                    hasVisitedDuringCheat[nextPoint.x][nextPoint.y] = true;
+                    queue.add(new PointStep(nextPoint, currentNoSteps + 1));
+                }
+            }
+        }
+
+        return getNoStepsSavedInLookup(cheatsPerNoSteps);
+    }
+
+    private static long doPartOne(char[][] area, int[][] steps, ArrayList<Point> path) {
         int[] cheatsPerNoSteps = new int[10000];
 
         for (Point point : path) {
@@ -74,6 +139,10 @@ public class D20 {
             }
         }
 
+        return getNoStepsSavedInLookup(cheatsPerNoSteps);
+    }
+
+    private static long getNoStepsSavedInLookup(int[] cheatsPerNoSteps) {
         for (int i = 0; i < cheatsPerNoSteps.length; i++) {
             if (cheatsPerNoSteps[i] < 0) {
                 throw new RuntimeException("Negative cheatsPerNoSteps");
@@ -83,17 +152,14 @@ public class D20 {
                 continue;
             }
 
-            System.out.println("There are " + cheatsPerNoSteps[i] + " cheats that save " + i + " picoseconds");
+            System.out.println("There are " + cheatsPerNoSteps[i] + " cheats that save " + i + " picoseconds.");
         }
 
         long noStepsSavedInLookup = 0;
         for (int i = MIN_SAVE_LOOKUP; i < cheatsPerNoSteps.length; i++) {
             noStepsSavedInLookup += cheatsPerNoSteps[i];
         }
-
-        System.out.println("There are " + noStepsSavedInLookup + " cheats that save at least " + MIN_SAVE_LOOKUP + " " +
-                "picoseconds");
-        System.out.println("Final answer for part one: " + noStepsSavedInLookup);
+        return noStepsSavedInLookup;
     }
 
     private static boolean getIsBadPoint(char[][] area, Point nextPoint) {
@@ -101,10 +167,7 @@ public class D20 {
     }
 
     private static boolean getIsWallPoint(char[][] area, Point nextPoint) {
-        if (area[nextPoint.x][nextPoint.y] == WALL.getValue()) {
-            return true;
-        }
-        return false;
+        return area[nextPoint.x][nextPoint.y] == WALL.getValue();
     }
 
     private static boolean getIsOutOfBounds(char[][] area, Point nextPoint) {
