@@ -1,15 +1,9 @@
 package D17;
 
-import D16.*;
-
-import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.*;
-
-import static D16.Direction.*;
-import static D16.Type.*;
 
 public class D17 {
     public void main() {

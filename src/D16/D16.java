@@ -7,7 +7,7 @@ import java.util.*;
 import java.util.List;
 
 import static D16.Direction.*;
-import static D16.Type.*;
+import static D16.RaceablePointType.*;
 
 public class D16 {
 

@@ -1,13 +1,13 @@
 package D16;
 
-public enum Type {
+public enum RaceablePointType {
     WALL('#'),
     EMPTY('.'),
     START('S'),
     END('E');
     private final char value;
 
-    Type(char value) {
+    RaceablePointType(char value) {
         this.value = value;
     }
 

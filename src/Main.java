@@ -17,7 +17,7 @@ import D16.D16;
 import D17.D17;
 import D18.D18;
 //import D19.D19;
-//import D20.D20;
+import D20.D20;
 //import D21.D21;
 //import D22.D22;
 //import D23.D23;
@@ -46,13 +46,13 @@ public class Main {
         D17 d17 = new D17();
         D18 d18 = new D18();
 //        D19 d19 = new D19();
-//        D20 d20 = new D20();
+        D20 d20 = new D20();
 //        D21 d21 = new D21();
 //        D22 d22 = new D22();
 //        D23 d23 = new D23();
 //        D24 d24 = new D24();
 //        D25 d25 = new D25();
 
-        d18.main();
+        d20.main();
     }
 }
