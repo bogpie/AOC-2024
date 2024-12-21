@@ -3,14 +3,24 @@ package D16;
 import lombok.Getter;
 
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.List;
 
 public enum Direction {
+    WEST(new Point(0, -1)),
     NORTH(new Point(-1, 0)),
     SOUTH(new Point(1, 0)),
-    WEST(new Point(0, -1)),
     EAST(new Point(0, 1));
+
+
+    public static Direction charValueOf(char c) {
+        return switch (c) {
+            case '^' -> NORTH;
+            case 'v' -> SOUTH;
+            case '<' -> WEST;
+            case '>' -> EAST;
+            default -> null;
+        };
+    }
 
     private final Point value;
 

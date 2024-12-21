@@ -55,7 +55,7 @@ public class D21 {
         for (var code : codes) {
             System.out.println(code);
 
-            // Robot 1: Starts on the directional, at A, types the code, when finds looked up char, types A
+            // Human: Starts on the directional, at A, types the code, when finds looked up char, types A
             Point startPoint = new Point(
                     positions.get('A').x,
                     positions.get('A').y
@@ -63,28 +63,28 @@ public class D21 {
 
 
             // Don t use memo for the first robot since it is the only one that starts from a different point
-            ArrayList<String> firstRobotPaths = goRobot(numericKeypad, positions, code, startPoint, new HashMap<>());
+            ArrayList<String> humanPaths = goRobot(numericKeypad, positions, code, startPoint, new HashMap<>());
 
-            // Robot 2: Starts on the numeric, at B, types the code, when finds looked up char, types A
-            var secondRobotPaths = getSecondRobotPaths(directionalKeypad, positions, firstRobotPaths, memo);
-            System.out.println(memo.size());
+            // Robot 1: Starts on the numeric, at B, types the code, when finds looked up char, types A
+            var robotPaths = getRobotPaths(directionalKeypad, positions, humanPaths, memo);
 
-            // Robot 3: Like robot 2, but using their result as the code
-            var thirdRobotPaths = getSecondRobotPaths(directionalKeypad, positions, secondRobotPaths, memo);
-            System.out.println(memo.size());
+            // Robot 2 -> 25: The same, each output is a new input
+            for (int i = 2; i <= 2; i++) {
+                robotPaths = getRobotPaths(directionalKeypad, positions, robotPaths, memo);
 
-            // For the resultedPaths lenth, calculate the score, it is length * parse_numeric(code)
-            long score = thirdRobotPaths.get(0).length() * Long.parseLong(code.replaceAll("[^0-9]", ""));
+                System.out.println(memo.size());
+            }
+
+            // For the resultedPaths length, calculate the score, it is length * parse_numeric(code)
+            long score = robotPaths.get(0).length() * Long.parseLong(code.replaceAll("[^0-9]", ""));
             total += score;
-            System.out.println(score);
-            System.out.println();
         }
         System.out.println(total);
     }
 
-    private static ArrayList<String> getSecondRobotPaths(char[][] directionalKeypad, HashMap<Character, Point> positions,
-                                                         ArrayList<String> firstRobotPaths,
-                                                         Map<PointPair, ArrayList<String>> memo) {
+    private static ArrayList<String> getRobotPaths(char[][] directionalKeypad, HashMap<Character, Point> positions,
+                                                   ArrayList<String> firstRobotPaths,
+                                                   Map<PointPair, ArrayList<String>> memo) {
         Point startPoint;
         startPoint = new Point(
                 positions.get('B').x,
@@ -102,6 +102,7 @@ public class D21 {
         // Only keep secondRobotPaths that are the shortest
         int shortestLength = secondRobotPaths.stream().mapToInt(String::length).min().orElseThrow();
         secondRobotPaths.removeIf(path -> path.length() > shortestLength);
+
         return secondRobotPaths;
     }
 
@@ -174,7 +175,7 @@ public class D21 {
             if (currentPoint.equals(desiredPoint)) {
                 charPath = current.getPath() + "A";
                 charPaths.add(charPath);
-                continue;
+                break;
             }
 
             // Otherwise we need to move towards the desired point
