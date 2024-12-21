@@ -3,6 +3,8 @@ package D16;
 import lombok.Getter;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public enum Direction {
     NORTH(new Point(-1, 0)),
@@ -29,4 +31,15 @@ public enum Direction {
             case EAST -> WEST;
         };
     }
+
+    public char getChar() {
+        return switch (this) {
+            case NORTH -> '^';
+            case SOUTH -> 'v';
+            case WEST -> '<';
+            case EAST -> '>';
+        };
+    }
+
+    public static final List<Direction> directions = List.of(EAST, NORTH, WEST, SOUTH);
 }

@@ -162,7 +162,7 @@ public class D20 {
         return noStepsSavedInLookup;
     }
 
-    private static boolean getIsBadPoint(char[][] area, Point nextPoint) {
+    public static boolean getIsBadPoint(char[][] area, Point nextPoint) {
         return getIsOutOfBounds(area, nextPoint) || getIsWallPoint(area, nextPoint);
     }
 
@@ -170,7 +170,7 @@ public class D20 {
         return area[nextPoint.x][nextPoint.y] == WALL.getValue();
     }
 
-    private static boolean getIsOutOfBounds(char[][] area, Point nextPoint) {
+    public static boolean getIsOutOfBounds(char[][] area, Point nextPoint) {
         return nextPoint.x < 0 || nextPoint.x >= area.length
                 || nextPoint.y < 0 || nextPoint.y >= area[0].length;
     }
