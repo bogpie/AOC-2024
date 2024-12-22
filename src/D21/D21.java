@@ -69,7 +69,7 @@ public class D21 {
             var robotPaths = getRobotPaths(directionalKeypad, positions, humanPaths, memo);
 
             // Robot 2 -> 25: The same, each output is a new input
-            for (int i = 2; i <= 2; i++) {
+            for (int i = 2; i <= 25; i++) {
                 robotPaths = getRobotPaths(directionalKeypad, positions, robotPaths, memo);
 
                 System.out.println(memo.size());
@@ -95,8 +95,12 @@ public class D21 {
         // For the directional keypad of the 2nd robot, we need to change the desired point from 'A' to 'B'
         firstRobotPaths.replaceAll(s -> s.replaceAll("A", "B"));
 
+        int threshold = 1;
         for (var firstRobotPath : firstRobotPaths) {
             secondRobotPaths.addAll(goRobot(directionalKeypad, positions, firstRobotPath, startPoint, memo));
+            if (secondRobotPaths.size() > threshold) {
+                secondRobotPaths = new ArrayList<>(secondRobotPaths.subList(0, threshold));
+            }
         }
 
         // Only keep secondRobotPaths that are the shortest
@@ -118,6 +122,11 @@ public class D21 {
         codePaths.add("");
 
         for (char desiredChar : code.toCharArray()) {
+            int threshold = 1;
+            if (codePaths.size() > threshold) {
+                codePaths = new ArrayList<>(codePaths.subList(0, threshold));
+            }
+
             var desiredPoint = positions.get(desiredChar);
 
             ArrayList<String> charPaths;
@@ -129,12 +138,16 @@ public class D21 {
             for (var currentCodePath : codePaths) {
                 for (var currentCharPath : charPaths) {
                     newCodePaths.add(currentCodePath + currentCharPath);
+                    if (newCodePaths.size() > threshold) {
+                        break;
+                    }
                 }
             }
             codePaths = newCodePaths;
 
             // Update the start point
             startPoint = desiredPoint;
+
         }
 
         return codePaths;
@@ -172,10 +185,15 @@ public class D21 {
             var currentPoint = current.getPoint();
 
             // If we reached the desired point, we can press 'A' and stop
+
+            int threshold = 1;
             if (currentPoint.equals(desiredPoint)) {
                 charPath = current.getPath() + "A";
                 charPaths.add(charPath);
-                break;
+
+                if (charPaths.size() > threshold) {
+                    break;
+                }
             }
 
             // Otherwise we need to move towards the desired point

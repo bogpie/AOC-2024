@@ -3,9 +3,9 @@ package D21;
 import java.awt.*;
 
 public class TypingPoint {
-    private Point point;
-    private String path;
-    private int distance;
+    private final Point point;
+    private final String path;
+    private final int distance;
 
     public TypingPoint(Point point, String path, int distance) {
         this.point = point;
