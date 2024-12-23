@@ -5,10 +5,69 @@ import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.lang.Math.*;
+
 public class D23 {
     public void main() {
         Set<Node> nodes = new TreeSet<>();
+        populate(nodes);
 
+        Set<Cycle> cycles = new TreeSet<>();
+        Set<Node> tNodes = new TreeSet<>();
+
+        System.out.println("Part 1: ");
+        doPartOne(nodes, cycles, tNodes);
+        System.out.println(tNodes);
+        System.out.println(cycles.stream().toList().subList(0, min(cycles.size(), 10)));
+        System.out.println(cycles.size());
+
+        System.out.println("Part 2: ");
+        Set<Node> maximalClique = new TreeSet<>();
+        doPartTwo(nodes, maximalClique);
+        System.out.println(maximalClique);
+        System.out.println(maximalClique.toString()
+                .replace("[", "")
+                .replace("]", "")
+                .replace(", ", ","));
+    }
+
+    private void doPartTwo(Set<Node> nodes, Set<Node> maximalClique) {
+        // For each node, start from a clique containing only that node
+        for (Node node : nodes) {
+            Set<Node> startClique = new TreeSet<>();
+            startClique.add(node);
+
+            var currentMaximalClique = findCurrentMaximalClique(nodes, startClique);
+            if (currentMaximalClique.size() > maximalClique.size()) {
+                maximalClique.clear();
+                maximalClique.addAll(currentMaximalClique);
+            }
+        }
+    }
+
+    Set<Node> findCurrentMaximalClique(Set<Node> nodes, Set<Node> clique) {
+        for (Node node : nodes) {
+            if (clique.contains(node)) {
+                continue;
+            }
+
+            // If node belongs to the clique, add it to the new clique
+            if (clique.stream().allMatch(n -> n.getNext().contains(node))) {
+                clique.add(node);
+            }
+        }
+
+        return clique;
+    }
+
+
+    private void doPartOne(Set<Node> nodes, Set<Cycle> cycles, Set<Node> tNodes) {
+        tNodes.addAll(nodes.stream().filter(node -> node.getValue().startsWith("t"))
+                .collect(Collectors.toSet()));
+        cycles.addAll(findCyclesForSubset(tNodes, 3));
+    }
+
+    private static void populate(Set<Node> nodes) {
         try {
             Scanner scanner = new Scanner(new File("src/D23/input.txt"));
 
@@ -32,15 +91,6 @@ public class D23 {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        var tNodes = nodes.stream().filter(node -> node.getValue().startsWith("t"))
-                .collect(Collectors.toSet());
-
-        System.out.println(tNodes);
-
-        var cycles = findCyclesForSubset(tNodes, 3);
-        System.out.println(cycles);
-        System.out.println(cycles.size());
     }
 
     public Set<Cycle> findCyclesForSubset(Set<Node> tNodes, int length) {
