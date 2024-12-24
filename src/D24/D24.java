@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class D24 {
     public void main() {
@@ -25,21 +26,26 @@ public class D24 {
         System.out.println();
         ArrayList<String> faultyOutputs = new ArrayList<>();
 
-        // 1. If the output of a gate is z, then the operation has to be XOR unless it is the last bit.
         ArrayList<String> faultyOutputs1 = new ArrayList<>();
         findFaultyOutputsRule1(outputToConnection, bitNamesZ, faultyOutputs1);
 
-        // 2. If the output of a gate is NOT Z and the inputs are NOT x, y, then it has to be AND / OR, but not XOR
         ArrayList<String> faultyOutputs2 = new ArrayList<>();
         findFaultyOutputsRule2(outputToConnection, faultyOutputs2);
 
-        // 3. If you have a XOR gate with inputs x, y, there must be another XOR gate with this gate as an input.
         ArrayList<String> faultyOutputs3 = new ArrayList<>();
         findFaultyOutputsRule3(outputToConnection, faultyOutputs3);
 
+        ArrayList<String> faultyOutputs4 = new ArrayList<>();
+        findFaultyOutputsRule4(outputToConnection, faultyOutputs4);
 
         faultyOutputs.addAll(faultyOutputs1);
         faultyOutputs.addAll(faultyOutputs2);
+        faultyOutputs.addAll(faultyOutputs3);
+        faultyOutputs.addAll(faultyOutputs4);
+
+        System.out.println(faultyOutputs1);
+        System.out.println(faultyOutputs2);
+        System.out.println(faultyOutputs3);
 
         var distinctFaultyOutputs = faultyOutputs.stream().distinct().toList();
         var sortedFaultyOutputs = distinctFaultyOutputs.stream().sorted().toList();
@@ -53,16 +59,72 @@ public class D24 {
 
     }
 
-    private void findFaultyOutputsRule3(
-            HashMap<String, Connection> outputToConnection,
-            ArrayList<String> faultyOutputs3) {
-        var connectionsForXORWithXY = outputToConnection
-                .entrySet().stream()
-                .filter(entry -> entry.getValue().gate().value().equals("XOR"))
-                .filter(entry -> entry.getValue().input1().startsWith("x") && entry.getValue().input2().startsWith("y"));
-        System.out.println(connectionsForXORWithXY);
+
+    // 4. If you have an AND-gate, there must be an OR-gate with this gate as an input
+    // N/A for gates with input x00, y00
+    private void findFaultyOutputsRule4(
+            HashMap<String, Connection> outputToConnection, ArrayList<String> faultyOutputs4
+    ) {
+        var connectionsForAND = outputToConnection
+                .entrySet()
+                .stream()
+                .filter(entry -> entry.getValue().gate().value().equals("AND"))
+                .filter(
+                        entry -> !entry.getValue().input1().endsWith("00") &&
+                                !entry.getValue().input2().endsWith("00")
+                )
+                .toList();
+
+        var faultyGatesRule4 = connectionsForAND
+                .stream()
+                .filter(
+                        entry -> outputToConnection.values().stream()
+                                .noneMatch(
+                                        connection ->
+                                                connection.gate().value().equals("OR") && (
+                                                        connection.input1().equals(entry.getKey())
+                                                                || connection.input2().equals(entry.getKey())
+                                                )
+                                )
+                )
+                .toList();
+
+        faultyOutputs4.addAll(faultyGatesRule4.stream().map(Map.Entry::getKey).toList());
     }
 
+    // 3. If you have a XOR gate with inputs x, y, there must be another XOR gate with this gate as an input.
+    // N/A for gates with input x00, y00
+    private void findFaultyOutputsRule3(
+            HashMap<String, Connection> outputToConnection,
+            ArrayList<String> faultyOutputs3
+    ) {
+        // Find XOR gates with inputs x, y
+        var connectionsForXORWithXYStream = outputToConnection
+                .entrySet().stream()
+                .filter(entry -> entry.getValue().gate().value().equals("XOR"))
+                .filter(entry -> entry.getValue().input1().startsWith("x") && entry.getValue().input2().startsWith("y"))
+                .filter(entry -> !entry.getValue().input1().endsWith("00") && !entry.getValue().input2().endsWith("00"));
+
+        // Filter the ones who do not have that XOR gate as an input in a XOR gate
+        faultyOutputs3.addAll(
+                connectionsForXORWithXYStream
+                        .filter(
+                                entry -> outputToConnection.values().stream()
+                                        .noneMatch(
+                                                connection ->
+                                                        connection.gate().value().equals("XOR") && (
+                                                                connection.input1().equals(entry.getKey())
+                                                                        || connection.input2().equals(entry.getKey())
+                                                        )
+                                        )
+                        )
+                        .map(Map.Entry::getKey)
+                        .toList()
+        );
+
+    }
+
+    // 2. If the output of a gate is NOT Z and the inputs are NOT x, y, then it has to be AND / OR, but not XOR
     private static void findFaultyOutputsRule2(
             HashMap<String, Connection> outputToConnection,
             ArrayList<String> faultyOutputs2
@@ -87,6 +149,7 @@ public class D24 {
         faultyOutputs2.addAll(faultyGatesRule2.stream().map(Map.Entry::getKey).toList());
     }
 
+    // 1. If the output of a gate is z, then the operation has to be XOR unless it is the last bit.
     private static void findFaultyOutputsRule1(
             HashMap<String, Connection> outputToConnection,
             ArrayList<String> bitNamesZ, ArrayList<String> faultyOutputs1
@@ -104,7 +167,7 @@ public class D24 {
                         entry -> !entry.getKey().equals(lastBitName)
                 )
                 .filter(
-                        entry -> entry.getValue().gate().value().equals("XOR")
+                        entry -> !entry.getValue().gate().value().equals("XOR")
                 )
                 .toList();
 
